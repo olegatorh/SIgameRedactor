@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import './CreateQuiz.css';
 import { useDispatch, useSelector } from "react-redux";
 import { updateStep } from "@/store/quizSlice";
-import {CreateRoundsHelper, CreateThemesHelper} from "@/app/services/roundCreateHelper";
+import {CreateThemesHelper} from "@/app/services/QuizCreateHelper";
 
 export default function CreateThemes() {
     const rounds = useSelector((state) => state.quizApi.quiz.rounds);

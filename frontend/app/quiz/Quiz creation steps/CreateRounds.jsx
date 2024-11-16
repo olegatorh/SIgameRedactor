@@ -1,7 +1,7 @@
 import {useState} from "react";
 import './CreateQuiz.css';
 import {useDispatch, useSelector} from "react-redux";
-import {CreateRoundsHelper} from "@/app/services/roundCreateHelper";
+import {CreateRoundsHelper} from "@/app/services/QuizCreateHelper";
 import {updateStep} from "@/store/quizSlice";
 
 export default function CreateRounds() {

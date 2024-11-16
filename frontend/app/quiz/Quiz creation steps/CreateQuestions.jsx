@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import './CreateQuiz.css';
-import { useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { updateStep } from "@/store/quizSlice";
+import {CreateQuestionsHelper} from "@/app/services/QuizCreateHelper";
 
 export default function CreateQuestions() {
     const rounds = useSelector((state) => state.quizApi.quiz.rounds);
     const [updatedRounds, setUpdatedRounds] = useState([]);
-
+    const dispatch = useDispatch()
     useEffect(() => {
         if (rounds && rounds.length > 0) {
             setUpdatedRounds(rounds.map(round => ({
@@ -72,7 +73,8 @@ export default function CreateQuestions() {
         e.preventDefault();
         try {
             console.log('updatedRounds', updatedRounds)
-            // dispatch(updateStep())
+            await CreateQuestionsHelper(updatedRounds, dispatch)
+            dispatch(updateStep())
         } catch (error) {
             alert(error.message);
         }

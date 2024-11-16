@@ -41,7 +41,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         theme_id = data.get('theme_id')
-        themes_count = Round.objects.filter(theme_id=theme_id).count()
+        themes_count = Theme.objects.filter(theme=theme_id).count()
         if themes_count >= 10:
             raise serializers.ValidationError("You can only add up to 10 questions  per theme.")
         return data

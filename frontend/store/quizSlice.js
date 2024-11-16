@@ -63,6 +63,24 @@ export const createTheme = createAsyncThunk('quizApi/createTheme', async (quizDa
     }
 })
 
+
+export const createQuestion = createAsyncThunk('quizApi/createQuestion', async (quizData, {
+    rejectWithValue, getState
+}) => {
+    try {
+        const {auth} = getState();
+        console.log('create question', quizData)
+        const response = await axiosInstance.post('quiz/question/', quizData, {
+            headers: {
+                Authorization: `Bearer ${auth.access_token}`,
+            },
+        })
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+})
+
 // export const createTags = createAsyncThunk('quizApi/createTag', async (quizData, {rejectWithValue, getState}) => {
 //     try {
 //         const {auth} = getState();
@@ -80,11 +98,7 @@ export const createTheme = createAsyncThunk('quizApi/createTheme', async (quizDa
 
 const quizApiSlice = createSlice({
     name: 'quizApi', initialState: {
-        quiz: {},
-        current_step: 1,
-        isLoading: false,
-        error: null,
-        successMessage: null
+        quiz: {}, current_step: 1, isLoading: false, error: null, successMessage: null
     }, reducers: {
         updateStep: (state) => {
             state.current_step += 1
@@ -125,8 +139,9 @@ const quizApiSlice = createSlice({
             })
             .addCase(createRound.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.quiz = {  ...state.quiz,
-                rounds: [...(state.quiz.rounds || []), action.payload]};
+                state.quiz = {
+                    ...state.quiz, rounds: [...(state.quiz.rounds || []), action.payload]
+                };
                 state.successMessage = "Adding new round successful!";
             })
             .addCase(createRound.rejected, (state, action) => {
@@ -139,12 +154,10 @@ const quizApiSlice = createSlice({
             })
             .addCase(createTheme.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.quiz = {  ...state.quiz,
-                    rounds: state.quiz.rounds.map(round =>
-                    round.id === action.payload.round_id
-                        ? { ...round, themes: [...(round.themes || []), action.payload] }
-                        : round
-                    )
+                state.quiz = {
+                    ...state.quiz, rounds: state.quiz.rounds.map(round => round.id === action.payload.round_id ? {
+                        ...round, themes: [...(round.themes || []), action.payload]
+                    } : round)
                 }
                 state.successMessage = "Adding new theme successful!";
             })
@@ -152,7 +165,30 @@ const quizApiSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload?.message || "Adding new theme failed";
             })
+            .addCase(createQuestion.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(createQuestion.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.quiz = {
+                    ...state.quiz, rounds: state.quiz.rounds.map(round => {
+                        const updatedThemes = round.themes.map(theme => theme.id === action.payload.theme_id ? {
+                            ...theme, questions: [...(theme.questions || []), action.payload]
+                        } : theme);
 
+                        return {
+                            ...round, themes: updatedThemes
+                        };
+                    })
+                };
+
+                state.successMessage = "Adding new question successful!";
+            })
+            .addCase(createQuestion.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload?.message || "Adding new question failed";
+            })
     },
 });
 
