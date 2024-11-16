@@ -1,0 +1,24 @@
+# quiz/admin.py
+from django.contrib import admin
+from .models import Package, Tag, Round, Theme, Question
+
+@admin.register(Package)
+class PackageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'date', 'difficulty', 'author', 'status', 'last_modified', 'id')
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('tag_names', 'package_id', 'id')
+
+
+@admin.register(Round)
+class RoundAdmin(admin.ModelAdmin):
+    list_display = ('round', 'package_id', 'order', 'id')
+
+@admin.register(Theme)
+class ThemeAdmin(admin.ModelAdmin):
+    list_display = ('theme', 'round_id', 'comments', 'id')
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('theme_id', 'question', 'question_type', 'question_price', 'answer', 'id', 'order')

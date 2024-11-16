@@ -1,0 +1,61 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.sqlite3
+
+# Virtualenv
+env/
+venv/
+ENV/
+.venv/
+
+# Django
+*.log
+*.pot
+*.py[cod]
+*.swp
+db.sqlite3
+media/
+staticfiles/
+*.cover
+*.mo
+*.pid
+*.seed
+*.backup
+
+# Local environment
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+.coverage
+.tox/
+.nox/
+pytest_cache/
+*.cover
+htmlcov/
+.cache
+
+# Ansible
+*.retry
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Ignore Django migrations
+*/migrations/
