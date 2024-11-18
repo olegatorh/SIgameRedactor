@@ -13,10 +13,14 @@ const LoginComponent = () => {
   const router = useRouter();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    dispatch(login(credentials));
+    const result = await dispatch(login(credentials));
+      localStorage.setItem('access_token', result.payload.access);
+      localStorage.setItem('refresh_token', result.payload.refresh);
   };
+
+
   useEffect(() => {
     if (auth.access_token) {
       router.push('/');

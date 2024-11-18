@@ -4,7 +4,12 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
 
-# Create your models here.
+
+def upload_to(instance, filename):
+    return f'questions/{instance.theme_id_id}/{filename}'
+
+
+
 class Package(models.Model):
 
     STATUS_CHOICES = [
@@ -19,6 +24,9 @@ class Package(models.Model):
     author = models.CharField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     last_modified = models.DateTimeField(auto_now=True)
+    download_url = models.URLField(max_length=500, blank=True, null=True)
+
+
     def __str__(self):
         return self.title
 
@@ -61,6 +69,10 @@ class Theme(models.Model):
         return self.theme
 
 
+
+
+
+
 class Question(models.Model):
     TYPE_CHOICES = [
         (1, 'TEXT'),
@@ -68,16 +80,21 @@ class Question(models.Model):
         (3, 'AUDIO'),
         (4, 'VIDEO'),
     ]
+
+
     theme_id = models.ForeignKey(Theme, related_name='questions', on_delete=models.CASCADE)
     question = models.CharField(max_length=255)
     question_type = models.IntegerField(choices=TYPE_CHOICES)
     question_price = models.IntegerField()
     answer = models.CharField(max_length=255)
-    order = models.PositiveIntegerField(editable=False, blank=True,
-                                        null=True)
+    order = models.PositiveIntegerField(editable=False, blank=True, null=True)
+    question_file = models.FileField(upload_to=upload_to, null=True, blank=True)
+
+
     def save(self, *args, **kwargs):
         with transaction.atomic():
             rounds_count = Question.objects.select_for_update().filter(theme_id=self.theme_id).count()
+            print(rounds_count, 'rounds_count')
             if rounds_count >= 10:
                 raise ValidationError("You can only add up to 10 questions per theme.")
             self.order = rounds_count + 1

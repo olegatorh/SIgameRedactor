@@ -1,17 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+
 const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL; // Адреса вашого бекенду
 
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${API_URL}/users/login/`, credentials);
-    const { access, refresh } = response.data;
-
-    // Зберігаємо токени в localStorage
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response.data);
@@ -61,6 +56,7 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
+        console.log('login fullfiled', action.payload)
         state.access_token = action.payload.access;
         state.refresh_token = action.payload.refresh;
       })

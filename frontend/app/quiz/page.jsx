@@ -1,8 +1,8 @@
 "use client"
 
-import ProtectedRoute from "@/app/services/protectedProvider";
+
+
 import Header from "@/app/header/header";
-import QuizVisualisation from "@/app/quiz/vizualization";
 import {useSelector} from "react-redux";
 import CreateQuiz from "@/app/quiz/Quiz creation steps/CreateQuiz";
 import CreateTags from "@/app/quiz/Quiz creation steps/CreateTags";
@@ -10,6 +10,8 @@ import CreateRounds from "@/app/quiz/Quiz creation steps/CreateRounds";
 import CreateThemes from "@/app/quiz/Quiz creation steps/CreateThemes";
 import CreateQuestions from "@/app/quiz/Quiz creation steps/CreateQuestions";
 import CreateTemplate from "@/app/quiz/Quiz creation steps/CreateTemplate";
+import QuizVisualisation from "@/app/quiz/vizualization";
+import ProtectedRoute from "@/app/services/protectedProvider";
 
 export default function Quiz() {
   const currentStep = useSelector((state) => state.quizApi.current_step);
@@ -24,7 +26,7 @@ export default function Quiz() {
                       {currentStep === 3 && <CreateRounds/>}
                       {currentStep === 4 && <CreateThemes/>}
                       {currentStep === 5 && <CreateQuestions/>}
-                      {currentStep > 6 && <CreateTemplate/>}
+                      {currentStep === 6 && <CreateTemplate/>}
                   </div>
                       <QuizVisualisation/>
                   </div>

@@ -27,6 +27,7 @@ class RoundSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("You can only add up to 10 rounds per package.")
         return data
 
+
 class ThemeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Theme
@@ -41,7 +42,33 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         theme_id = data.get('theme_id')
-        themes_count = Theme.objects.filter(theme=theme_id).count()
+        print(Theme.objects.filter(theme=theme_id))
+        themes_count = Theme.objects.filter(id=theme_id.id).count()
         if themes_count >= 10:
             raise serializers.ValidationError("You can only add up to 10 questions  per theme.")
         return data
+
+
+class ThemeDownloadSerializer(serializers.ModelSerializer):
+    questions = QuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Theme
+        fields = ['id', 'theme', 'comments', 'questions']
+
+
+class RoundDownloadSerializer(serializers.ModelSerializer):
+    themes = ThemeDownloadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Round
+        fields = ['id', 'round', 'order', 'themes']
+
+
+class PackageDownloadSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+    rounds = RoundDownloadSerializer(many=True, read_only=True)
+    class Meta:
+        model = Package
+        fields = '__all__'
+

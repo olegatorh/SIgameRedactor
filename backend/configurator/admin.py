@@ -4,7 +4,7 @@ from .models import Package, Tag, Round, Theme, Question
 
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'date', 'difficulty', 'author', 'status', 'last_modified', 'id')
+    list_display = ('title', 'user', 'date', 'difficulty', 'author', 'status', 'last_modified', 'id', 'download_url')
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -21,4 +21,4 @@ class ThemeAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('theme_id', 'question', 'question_type', 'question_price', 'answer', 'id', 'order')
+    list_display = ('theme_id', 'question', 'question_type', 'question_price', 'answer', 'id', 'order', 'question_file')

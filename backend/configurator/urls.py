@@ -3,10 +3,11 @@ from django.urls import path
 from .models import Question
 from .views import PackageCreateAPIView, PackageDetailAPIView, TagCreateAPIView, RoundCreateAPIView, ThemeCreateAPIView, \
     ThemeDetailAPIView, QuestionCreateAPIView, QuestionDetailAPIView, RoundDetailAPIView, TagDetailAPIView, \
-    QuizRoundsAPIView
+    QuizRoundsAPIView, PackageDownloadAPIView
 
 urlpatterns = [
     path('packages/', PackageCreateAPIView.as_view(), name='package_create'),
+    path('download/<int:pk>/', PackageDownloadAPIView.as_view(), name='package_download'),
     path('packages/<int:pk>/', PackageDetailAPIView.as_view(), name='package_detail'),
     path('tag/', TagCreateAPIView.as_view(), name='package_create'),
     path('tag/<int:pk>/', TagDetailAPIView.as_view(), name='package_detail'),

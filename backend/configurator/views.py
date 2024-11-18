@@ -1,9 +1,13 @@
+import os
+
 from rest_framework import generics, status
-from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from backend import settings
 from .models import Package, Tag, Round, Theme, Question
-from .serializers import PackageSerializer, TagSerializer, RoundSerializer, ThemeSerializer, QuestionSerializer
+from .serializers import PackageSerializer, TagSerializer, RoundSerializer, ThemeSerializer, QuestionSerializer, PackageDownloadSerializer
+from .utils import create_archive
 
 
 class BaseDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -76,3 +80,18 @@ class QuizRoundsAPIView(generics.RetrieveAPIView):
         rounds = Round.objects.filter(package_id=package_id)
         serializer = self.serializer_class(rounds, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PackageDownloadAPIView(generics.RetrieveAPIView):
+
+    def get(self, request, *args, **kwargs):
+        package_id = kwargs.get('pk')
+        package = get_object_or_404(Package, pk=package_id)
+        serializer = PackageDownloadSerializer(package)
+        package_link = create_archive(serializer.data)
+        relative_path = os.path.relpath(package_link, settings.MEDIA_ROOT)
+        download_url = request.build_absolute_uri(settings.MEDIA_URL + relative_path)
+        package.status = 'completed'
+        package.download_url = download_url
+        package.save()
+        return Response({'download_url': download_url})

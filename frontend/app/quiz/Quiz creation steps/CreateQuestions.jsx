@@ -8,6 +8,7 @@ export default function CreateQuestions() {
     const rounds = useSelector((state) => state.quizApi.quiz.rounds);
     const [updatedRounds, setUpdatedRounds] = useState([]);
     const dispatch = useDispatch()
+
     useEffect(() => {
         if (rounds && rounds.length > 0) {
             setUpdatedRounds(rounds.map(round => ({
@@ -31,8 +32,29 @@ export default function CreateQuestions() {
                                 ...theme,
                                 questions: [
                                     ...theme.questions,
-                                    { id: Date.now(), value: '', type: '1', content: '', answer: '' }
+                                    { id: Date.now(), value: '', type: '1', content: '', answer: '', file: null}
                                 ]
+                            };
+                        }
+                        return theme;
+                    })
+                };
+            }
+            return round;
+        });
+        setUpdatedRounds(newRounds);
+    };
+
+    const removeQuestion = (roundId, themeId, questionId) => {
+        const newRounds = updatedRounds.map(round => {
+            if (round.id === roundId) {
+                return {
+                    ...round,
+                    themes: round.themes.map(theme => {
+                        if (theme.id === themeId) {
+                            return {
+                                ...theme,
+                                questions: theme.questions.filter(question => question.id !== questionId)
                             };
                         }
                         return theme;
@@ -90,7 +112,7 @@ export default function CreateQuestions() {
                             <h4 className="form-label">{`Theme: ${theme.theme}`}</h4>
                             <button
                                 onClick={() => addQuestion(round.id, theme.id)}
-                                className="form-button add-question-button"
+                                className="form-button"
                                 style={{ marginBottom: '1rem' }}
                             >
                                 Додати питання
@@ -123,7 +145,6 @@ export default function CreateQuestions() {
                                         </div>
                                         <div className="question-field">
                                             <label className="question-label">Question</label>
-                                            {question.type === "1" ? (
                                                 <input
                                                     type="text"
                                                     value={question.content}
@@ -131,13 +152,13 @@ export default function CreateQuestions() {
                                                     placeholder="Питання"
                                                     className="form-input"
                                                 />
-                                            ) : (
+                                            {question.type !== "1" ? (
                                                 <input
                                                     type="file"
-                                                    onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'content', e.target.files[0])}
+                                                    onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'file', e.target.files[0])}
                                                     className="form-input"
                                                 />
-                                            )}
+                                            ):<></>}
                                         </div>
                                         <div className="question-field">
                                             <label className="question-label">Answer</label>
@@ -149,6 +170,13 @@ export default function CreateQuestions() {
                                                 className="form-input"
                                             />
                                         </div>
+                                        <button
+                                            onClick={() => removeQuestion(round.id, theme.id, question.id)}
+                                            className="form-button remove-question-button"
+                                            style={{ marginTop: '1rem' }}
+                                        >
+                                            Видалити питання
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
