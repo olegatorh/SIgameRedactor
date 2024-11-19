@@ -1,10 +1,10 @@
 import os
 
+from django.conf import settings
 from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from backend import settings
 from .models import Package, Tag, Round, Theme, Question
 from .serializers import PackageSerializer, TagSerializer, RoundSerializer, ThemeSerializer, QuestionSerializer, PackageDownloadSerializer
 from .utils import create_archive

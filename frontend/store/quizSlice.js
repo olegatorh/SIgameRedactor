@@ -79,12 +79,19 @@ export const createQuestion = createAsyncThunk('quizApi/createQuestion', async (
         if (quizData.question_file) {
             formData.append('question_file', quizData.question_file);
         }
+        if (quizData.question_transfer > 0) {
+            formData.append('question_transfer', quizData.question_transfer);
+        }
+        if (quizData.real_price) {
+            formData.append('real_price', quizData.real_price);
+        }
+
         const response = await axiosInstance.post('quiz/question/', formData, {
             headers: {
                 Authorization: `Bearer ${auth.access_token}`, 'Content-Type': 'multipart/form-data',
             },
         })
-        console.log('create questionm ', response.data)
+        console.log('created question ', response.data)
         return response.data;
     } catch (error) {
         console.log('create questionm ', error.response)

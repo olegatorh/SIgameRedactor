@@ -11,13 +11,18 @@ export default function CreateThemes() {
 
     useEffect(() => {
         if (rounds) {
-            setThemes(rounds.map(round => []));
+            setThemes(rounds.map(round => {
+                if (round.final) {
+                    return [{ roundId: round.id, value: '', comment: '' }];
+                }
+                return [];
+            }));
         }
     }, [rounds]);
 
     const addTopic = (roundIndex) => {
         const newThemes = [...themes];
-        newThemes[roundIndex].push({ roundId: rounds[roundIndex].id, value: '', comment: '' });
+        newThemes[roundIndex].push({roundId: rounds[roundIndex].id, value: '', comment: ''});
         setThemes(newThemes);
     };
 
@@ -29,7 +34,7 @@ export default function CreateThemes() {
 
     const handleTopicChange = (roundIndex, topicIndex, key, value) => {
         const newThemes = [...themes];
-        newThemes[roundIndex][topicIndex] = { ...newThemes[roundIndex][topicIndex], [key]: value };
+        newThemes[roundIndex][topicIndex] = {...newThemes[roundIndex][topicIndex], [key]: value};
         setThemes(newThemes);
     };
 
@@ -49,43 +54,72 @@ export default function CreateThemes() {
             {rounds && rounds.map((round, index) => (
                 <div key={index} className="form-group round-section">
                     <h3 className="form-label">{`Round ${round.order} - ${round.round}`}</h3>
-                    <button
-                        onClick={() => addTopic(index)}
-                        className="form-button add-round-button"
-                        style={{ marginBottom: '1rem' }}
-                    >
-                        Додати тему
-                    </button>
+                    {round.final && (<h3 className="form-label">This is a final round!</h3>)}
+
                     <ul className="topics-list">
-                        {themes[index]?.map((topic, topicIndex) => (
-                            <li key={topicIndex} className="topic-item">
+                        {round.final ? (
+                            <li className="topic-item">
                                 <input
                                     type="text"
-                                    value={topic.value}
-                                    onChange={(e) => handleTopicChange(index, topicIndex, 'value', e.target.value)}
+                                    value={themes[index]?.[0]?.value || ''}
+                                    onChange={(e) => handleTopicChange(index, 0, 'value', e.target.value)}
                                     placeholder="Назва теми"
                                     className="form-input"
-                                    style={{ marginRight: '0.5rem' }}
+                                    style={{marginRight: '0.5rem'}}
                                 />
                                 <input
                                     type="text"
-                                    value={topic.comment}
-                                    onChange={(e) => handleTopicChange(index, topicIndex, 'comment', e.target.value)}
+                                    value={themes[index]?.[0]?.comment || ''}
+                                    onChange={(e) => handleTopicChange(index, 0, 'comment', e.target.value)}
                                     placeholder="Коментар"
                                     className="form-input"
-                                    style={{ marginRight: '0.5rem' }}
+                                    style={{marginRight: '0.5rem'}}
                                 />
-                                <button
-                                    onClick={() => removeTopic(index, topicIndex)}
-                                    className="form-button remove-last-button"
-                                >
-                                    Забрати тему
-                                </button>
                             </li>
-                        ))}
+                        ) : (
+                            // Render multiple topic fields with add/remove options for non-final rounds
+                            themes[index]?.map((topic, topicIndex) => (
+                                <li key={topicIndex} className="topic-item">
+                                    <input
+                                        type="text"
+                                        value={topic.value}
+                                        onChange={(e) => handleTopicChange(index, topicIndex, 'value', e.target.value)}
+                                        placeholder="Назва теми"
+                                        className="form-input"
+                                        style={{marginRight: '0.5rem'}}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={topic.comment}
+                                        onChange={(e) => handleTopicChange(index, topicIndex, 'comment', e.target.value)}
+                                        placeholder="Коментар"
+                                        className="form-input"
+                                        style={{marginRight: '0.5rem'}}
+                                    />
+                                    <button
+                                        onClick={() => removeTopic(index, topicIndex)}
+                                        className="form-button remove-last-button"
+                                    >
+                                        Забрати тему
+                                    </button>
+                                </li>
+                            ))
+                        )}
                     </ul>
+
+                    {/* Show add topic button only for non-final rounds */}
+                    {!round.final && (
+                        <button
+                            onClick={() => addTopic(index)}
+                            className="form-button add-round-button"
+                            style={{marginBottom: '1rem'}}
+                        >
+                            Додати тему
+                        </button>
+                    )}
                 </div>
             ))}
+
             <form onSubmit={handleSubmit} className="quiz-form">
                 <button type="submit" className="form-button">Next</button>
             </form>

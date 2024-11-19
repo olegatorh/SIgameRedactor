@@ -13,7 +13,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Round)
 class RoundAdmin(admin.ModelAdmin):
-    list_display = ('round', 'package_id', 'order', 'id')
+    list_display = ('round', 'package_id', 'order', 'id', 'final')
 
 @admin.register(Theme)
 class ThemeAdmin(admin.ModelAdmin):
@@ -21,4 +21,4 @@ class ThemeAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('theme_id', 'question', 'question_type', 'question_price', 'answer', 'id', 'order', 'question_file')
+    list_display = ('theme_id', 'question', 'question_type', 'content_type', 'question_price', 'answer', 'id', 'order', 'question_file', 'question_transfer', 'real_price')

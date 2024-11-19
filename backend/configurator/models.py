@@ -40,6 +40,7 @@ class Round(models.Model):
     package_id = models.ForeignKey(Package, related_name='rounds', on_delete=models.CASCADE)
     order = models.PositiveIntegerField(editable=False, blank=True,
                                         null=True)
+    final = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
@@ -74,21 +75,37 @@ class Theme(models.Model):
 
 
 class Question(models.Model):
-    TYPE_CHOICES = [
+    CONTENT_CHOICES = [
         (1, 'TEXT'),
         (2, 'IMAGE'),
         (3, 'AUDIO'),
         (4, 'VIDEO'),
     ]
+    TYPE_CHOICES = [
+        (1, 'simple'),
+        (2, 'stake'),
+        (3, 'secret'),
+        (4, 'secretPublicPrice'),
+        (5, 'noRisk'),
+    ]
+
+    TRANSFER_CHOICES = [
+        (1, 'All'),
+        (2, 'All_except_you')
+    ]
 
 
     theme_id = models.ForeignKey(Theme, related_name='questions', on_delete=models.CASCADE)
     question = models.CharField(max_length=255)
-    question_type = models.IntegerField(choices=TYPE_CHOICES)
-    question_price = models.IntegerField()
+    content_type = models.IntegerField(choices=CONTENT_CHOICES, default=1)
+    question_type = models.IntegerField(choices=TYPE_CHOICES, default=1)
+    question_price = models.PositiveIntegerField()
     answer = models.CharField(max_length=255)
     order = models.PositiveIntegerField(editable=False, blank=True, null=True)
     question_file = models.FileField(upload_to=upload_to, null=True, blank=True)
+    question_transfer = models.IntegerField(choices=TRANSFER_CHOICES, blank=True, null=True)
+    real_price = models.PositiveIntegerField(blank=True, null=True)
+
 
 
     def save(self, *args, **kwargs):
@@ -98,6 +115,9 @@ class Question(models.Model):
             if rounds_count >= 10:
                 raise ValidationError("You can only add up to 10 questions per theme.")
             self.order = rounds_count + 1
+
+            if not self.real_price :
+                self.real_price = self.question_price
             super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

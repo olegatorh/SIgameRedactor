@@ -15,7 +15,7 @@ export default function CreateQuestions() {
                 ...round,
                 themes: round.themes.map(theme => ({
                     ...theme,
-                    questions: theme.questions || []  // Ініціалізуємо пустим масивом, якщо немає питань
+                    questions: theme.questions || []
                 }))
             })));
         }
@@ -32,7 +32,7 @@ export default function CreateQuestions() {
                                 ...theme,
                                 questions: [
                                     ...theme.questions,
-                                    { id: Date.now(), value: '', type: '1', content: '', answer: '', file: null}
+                                    { id: Date.now(), value: '', content_type: '1', question_type: '1',content: '', answer: '', file: null, question_transfer: 0, question_real_price: 0, question_type_price: 0}
                                 ]
                             };
                         }
@@ -131,10 +131,10 @@ export default function CreateQuestions() {
                                             />
                                         </div>
                                         <div className="question-field">
-                                            <label className="question-label">Type</label>
+                                            <label className="question-label">Content Type</label>
                                             <select
-                                                value={question.type}
-                                                onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'type', e.target.value)}
+                                                value={question.content_type}
+                                                onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'content_type', e.target.value)}
                                                 className="form-input"
                                             >
                                                 <option value="1">Text</option>
@@ -143,22 +143,68 @@ export default function CreateQuestions() {
                                                 <option value="4">Video</option>
                                             </select>
                                         </div>
-                                        <div className="question-field">
-                                            <label className="question-label">Question</label>
-                                                <input
-                                                    type="text"
-                                                    value={question.content}
-                                                    onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'content', e.target.value)}
-                                                    placeholder="Питання"
-                                                    className="form-input"
-                                                />
-                                            {question.type !== "1" ? (
+                                        {question.content_type !== "1" ? (
                                                 <input
                                                     type="file"
                                                     onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'file', e.target.files[0])}
                                                     className="form-input"
                                                 />
-                                            ):<></>}
+                                            ) : <></>}
+                                        <div className="question-field">
+                                            <label className="question-label">Question Type</label>
+                                            <select
+                                                value={question.question_type}
+                                                onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'question_type', e.target.value)}
+                                                className="form-input"
+                                            >
+                                                <option value="1">Simple</option>
+                                                <option value="2">Stake</option>
+                                                <option value="3">Secret</option>
+                                                <option value="4">SecretPublicPrice</option>
+                                                <option value="5">noRisk</option>
+                                            </select>
+                                        </div>
+                                         {question.question_type === "3" || question.question_type === "4" ? (
+                                             <div className="question-field">
+                                                 <label className="question-label">Question transfer</label>
+                                                 <select
+                                                     value={question.question_transfer}
+                                                     onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'question_transfer', e.target.value)}
+                                                     className="form-input"
+                                                 >
+                                                     <option value="1">All</option>
+                                                     <option value="2">All except yourself</option>
+                                                 </select>
+                                                 <label className="question-label">Question cost type</label>
+                                                 <select
+                                                     value={question.question_type_price}
+                                                     onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'question_type_price', e.target.value)}
+                                                     className="form-input"
+                                                 >
+                                                     <option value="1">value from Price field</option>
+                                                     <option value="2">your fixed value</option>
+                                                 </select>
+                                                 {question.question_type_price === '2' ? (
+                                                     <input
+                                                         type="number"
+                                                         value={question.question_real_price}
+                                                         onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'question_real_price', e.target.value)}
+                                                         placeholder="Real question price"
+                                                         className="form-input"
+                                                     />
+                                                 ): <></>}
+                                             </div>
+
+                                         ) : <></>}
+                                        <div className="question-field">
+                                            <label className="question-label">Question</label>
+                                            <input
+                                                type="text"
+                                                value={question.content}
+                                                onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'content', e.target.value)}
+                                                placeholder="Питання"
+                                                className="form-input"
+                                            />
                                         </div>
                                         <div className="question-field">
                                             <label className="question-label">Answer</label>
@@ -173,7 +219,7 @@ export default function CreateQuestions() {
                                         <button
                                             onClick={() => removeQuestion(round.id, theme.id, question.id)}
                                             className="form-button remove-question-button"
-                                            style={{ marginTop: '1rem' }}
+                                            style={{marginTop: '1rem'}}
                                         >
                                             Видалити питання
                                         </button>

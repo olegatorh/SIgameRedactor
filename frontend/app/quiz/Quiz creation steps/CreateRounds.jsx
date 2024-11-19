@@ -6,6 +6,7 @@ import {updateStep} from "@/store/quizSlice";
 
 export default function CreateRounds() {
     const [roundData, setRoundData] = useState([{name: ''}]);
+    const [isFinalRound, setIsTrue] = useState(false); // State for true/false
     const dispatch = useDispatch();
     const quizId = useSelector((state) => state.quizApi.quiz.id);
     const handleRoundNameChange = (index, value) => {
@@ -27,13 +28,17 @@ export default function CreateRounds() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await CreateRoundsHelper(roundData, quizId, dispatch);
+            await CreateRoundsHelper(roundData, quizId, isFinalRound,  dispatch);
             console.log("Rounds created successfully:");
             dispatch(updateStep())
         } catch (error) {
             console.error("Failed to create rounds:", error);
         }
     };
+
+      const handleCheckboxToggle = () => {
+        setIsTrue((prev) => !prev)
+     };
 
     return (
         <form onSubmit={handleSubmit} className="quiz-form">
@@ -52,7 +57,17 @@ export default function CreateRounds() {
                     />
                 </div>
             ))}
-
+            <div className="form-group">
+                <label className="form-label styled-checkbox">
+                    Make this round Final
+                    <input
+                        type="checkbox"
+                        checked={isFinalRound} // Bind to the state
+                        onChange={handleCheckboxToggle} // Toggle state on change
+                        style={{marginLeft: "10px"}} // Adjust spacing for checkbox
+                    />
+                </label>
+            </div>
             <button
                 type="button"
                 onClick={addRound}
