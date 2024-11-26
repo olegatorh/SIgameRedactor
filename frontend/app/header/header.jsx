@@ -29,6 +29,7 @@ const Header = ({ children }) => {
             <>
               <button className="nav-button" onClick={handleLogout}>Logout</button>
               <button className="nav-button" onClick={() => router.push('/quiz')}>Quiz Redactor</button>
+              <button className="nav-button" onClick={() => router.push('/library')}>Quiz Library</button>
             </>
           )}
         </nav>

@@ -73,6 +73,7 @@ export const createQuestion = createAsyncThunk('quizApi/createQuestion', async (
         const formData = new FormData();
         formData.append('question', quizData.question);
         formData.append('question_type', quizData.question_type);
+        formData.append('content_type', quizData.content_type);
         formData.append('question_price', quizData.question_price);
         formData.append('answer', quizData.answer);
         formData.append('theme_id', quizData.theme_id);
@@ -117,6 +118,26 @@ export const downloadQuiz = createAsyncThunk('quizApi/downloadQuiz', async (quiz
         return rejectWithValue(error.response.data);
     }
 });
+
+export const getCompletedQuizzes = createAsyncThunk('quizApi/getQuizzes', async (quizData, {
+    rejectWithValue,
+    getState
+}) => {
+    try {
+        const {auth} = getState();
+        const response = await axiosInstance.get(`/quiz/completed/`, {
+            headers: {
+                Authorization: `Bearer ${auth.access_token}`,
+            },
+        });
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+});
+
+
 
 const quizApiSlice = createSlice({
     name: 'quizApi', initialState: {
@@ -222,6 +243,18 @@ const quizApiSlice = createSlice({
             .addCase(downloadQuiz.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload?.message || "Download new Quiz failed";
+            })
+            .addCase(getCompletedQuizzes.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getCompletedQuizzes.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.successMessage = "getting all Quizzes successful!";
+            })
+            .addCase(getCompletedQuizzes.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload?.message || "getting all Quizzes failed!";
             })
     },
 });

@@ -5,6 +5,20 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import shutil
 
+
+
+
+TYPE_CHOICES = {
+    1:'simple',
+    2:'stake',
+    3: 'secret',
+    4: 'secretPublicPrice',
+    5: 'noRisk'
+}
+
+
+
+
 def create_xml(package_data):
     package = ET.Element(
         "package",
@@ -29,7 +43,10 @@ def create_xml(package_data):
 
     rounds = ET.SubElement(package, "rounds")
     for round_data in package_data["rounds"]:
-        round_element = ET.SubElement(rounds, "round", {"name": round_data["round"]})
+        round_attributes = {"name": round_data["round"]}
+        if round_data.get("is_final_round", False):
+            round_attributes["isFinal"] = "true"
+        round_element = ET.SubElement(rounds, "round", round_attributes)
 
         themes = ET.SubElement(round_element, "themes")
         for theme_data in round_data["themes"]:
@@ -37,7 +54,12 @@ def create_xml(package_data):
 
             questions = ET.SubElement(theme_element, "questions")
             for question_data in theme_data["questions"]:
-                question_element = ET.SubElement(questions, "question", {"price": str(question_data["question_price"])})
+                print('question_data', question_data)
+                question_element = ET.SubElement(questions, "question", {
+                    "price": str(question_data["question_price"]),
+                    "type": str(TYPE_CHOICES.get(question_data["question_type"], 'simple')),
+                    "time": str(question_data.get("question_time", 30))  # Default time is 30 seconds if not provided
+                })
 
                 params = ET.SubElement(question_element, "params")
                 param_question = ET.SubElement(params, "param", {"name": "question", "type": "content"})
@@ -49,11 +71,11 @@ def create_xml(package_data):
                 # Додати файли, якщо є
                 if question_data["question_file"]:
                     file_type = None
-                    if question_data["question_type"] == 2:
+                    if question_data["content_type"] == 2:
                         file_type = "image"
-                    elif question_data["question_type"] == 3:
+                    elif question_data["content_type"] == 3:
                         file_type = "audio"
-                    elif question_data["question_type"] == 4:
+                    elif question_data["content_type"] == 4:
                         file_type = "video"
 
                     if file_type:
@@ -95,11 +117,11 @@ def create_archive(package_data):
             for question_data in theme_data["questions"]:
                 if question_data["question_file"]:
                     file_type = None
-                    if question_data["question_type"] == 2:
+                    if question_data["content_type"] == 2:
                         file_type = images_dir
-                    elif question_data["question_type"] == 3:
+                    elif question_data["content_type"] == 3:
                         file_type = audio_dir
-                    elif question_data["question_type"] == 4:
+                    elif question_data["content_type"] == 4:
                         file_type = videos_dir
 
                     if file_type:

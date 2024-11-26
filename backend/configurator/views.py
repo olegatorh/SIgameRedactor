@@ -68,18 +68,7 @@ class QuestionDetailAPIView(BaseDetailAPIView):
 
 class QuizRoundsAPIView(generics.RetrieveAPIView):
     queryset = Round.objects.all()
-    serializer_class = RoundSerializer
-
-    def get(self, request, *args, **kwargs):
-        print(self.kwargs)
-        package_id = self.kwargs.get('pk')
-
-        if package_id is None:
-            return Response({'error': 'package id is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        rounds = Round.objects.filter(package_id=package_id)
-        serializer = self.serializer_class(rounds, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer = RoundSerializer
 
 
 class PackageDownloadAPIView(generics.RetrieveAPIView):
@@ -95,3 +84,9 @@ class PackageDownloadAPIView(generics.RetrieveAPIView):
         package.download_url = download_url
         package.save()
         return Response({'download_url': download_url})
+
+
+
+class CompletedPackagesAPIView(generics.ListAPIView):
+    queryset = Package.objects.filter(status='completed')
+    serializer_class = PackageSerializer

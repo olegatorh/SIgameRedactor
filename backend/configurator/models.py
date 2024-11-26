@@ -81,6 +81,7 @@ class Question(models.Model):
         (3, 'AUDIO'),
         (4, 'VIDEO'),
     ]
+
     TYPE_CHOICES = [
         (1, 'simple'),
         (2, 'stake'),
@@ -105,8 +106,6 @@ class Question(models.Model):
     question_file = models.FileField(upload_to=upload_to, null=True, blank=True)
     question_transfer = models.IntegerField(choices=TRANSFER_CHOICES, blank=True, null=True)
     real_price = models.PositiveIntegerField(blank=True, null=True)
-
-
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
