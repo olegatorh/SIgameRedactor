@@ -19,19 +19,27 @@ const Header = ({ children }) => {
     <div>
       <header className="header">
         <nav className="nav">
-          <button className="nav-button" onClick={() => router.push('/')}>Home</button>
-          {!auth.access_token ? (
-            <>
-              <button className="nav-button" onClick={() => router.push('/login')}>Login</button>
-              <button className="nav-button" onClick={() => router.push('/register')}>Register</button>
-            </>
-          ) : (
-            <>
-              <button className="nav-button" onClick={handleLogout}>Logout</button>
-              <button className="nav-button" onClick={() => router.push('/quiz')}>Quiz Redactor</button>
+          <div className="nav-left">
+            <button className="nav-button" onClick={() => router.push('/')}>Home</button>
+            {auth.access_token && (
               <button className="nav-button" onClick={() => router.push('/library')}>Quiz Library</button>
-            </>
+            )}
+          </div>
+          {auth.access_token && (
+            <div className="nav-center">
+              <button className="nav-button" onClick={() => router.push('/quiz')}>Quiz Redactor</button>
+            </div>
           )}
+          <div className="nav-right">
+            {!auth.access_token ? (
+              <>
+                <button className="nav-button" onClick={() => router.push('/login')}>Login</button>
+                <button className="nav-button" onClick={() => router.push('/register')}>Register</button>
+              </>
+            ) : (
+              <button className="nav-button" onClick={handleLogout}>Logout</button>
+            )}
+          </div>
         </nav>
       </header>
       <main className="main-content">{children}</main>

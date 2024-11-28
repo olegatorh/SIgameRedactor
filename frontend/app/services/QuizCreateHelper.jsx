@@ -55,6 +55,7 @@ export const CreateQuestionsHelper = async (updatedRounds, dispatch) => {
                         'question_price': question.value,
                         'answer': question.answer,
                         'theme_id': themes.id,
+                        'answer_time': question.answer_time,
                         ...( (question.question_type === '3' || question.question_type === '4') && question.question_transfer === 0
                             ? { 'question_transfer': 1 }
                             : { 'question_transfer': question.question_transfer }),

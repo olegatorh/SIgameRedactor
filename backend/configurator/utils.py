@@ -58,7 +58,7 @@ def create_xml(package_data):
                 question_element = ET.SubElement(questions, "question", {
                     "price": str(question_data["question_price"]),
                     "type": str(TYPE_CHOICES.get(question_data["question_type"], 'simple')),
-                    "time": str(question_data.get("question_time", 30))  # Default time is 30 seconds if not provided
+                    "time": str(question_data.get("answer_time", 30))  # Default time is 30 seconds if not provided
                 })
 
                 params = ET.SubElement(question_element, "params")

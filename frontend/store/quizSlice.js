@@ -1,5 +1,6 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axiosInstance from "@/app/services/axiosInstance";
+import {logout} from "@/store/authSlice";
 
 
 export const createQuiz = createAsyncThunk('quizApi/createQuiz', async (quizData, {rejectWithValue, getState}) => {
@@ -77,6 +78,7 @@ export const createQuestion = createAsyncThunk('quizApi/createQuestion', async (
         formData.append('question_price', quizData.question_price);
         formData.append('answer', quizData.answer);
         formData.append('theme_id', quizData.theme_id);
+        formData.append('answer_time', quizData.answer_time);
         if (quizData.question_file) {
             formData.append('question_file', quizData.question_file);
         }
@@ -141,15 +143,29 @@ export const getCompletedQuizzes = createAsyncThunk('quizApi/getQuizzes', async 
 
 const quizApiSlice = createSlice({
     name: 'quizApi', initialState: {
-        quiz: {}, current_step: 1, isLoading: false, error: null, successMessage: null
+        quiz: {},
+        current_step: 1,
+        isLoading: false,
+        error: null,
+        successMessage: null
     }, reducers: {
         updateStep: (state) => {
             state.current_step += 1
             state.successMessage = null
             state.error = null
-        }
+        },
+        resetQuizState: (state) => {
+              state.quiz = {};
+              state.current_step = 1;
+              state.isLoading = false;
+              state.error = null;
+              state.successMessage = null;
+    }
     }, extraReducers: (builder) => {
         builder
+             .addCase(logout, (state) => {
+                quizApiSlice.caseReducers.resetQuizState(state);
+            })
             .addCase(createQuiz.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -259,5 +275,5 @@ const quizApiSlice = createSlice({
     },
 });
 
-export const {updateStep} = quizApiSlice.actions;
+export const {updateStep, resetQuizState} = quizApiSlice.actions;
 export default quizApiSlice.reducer;

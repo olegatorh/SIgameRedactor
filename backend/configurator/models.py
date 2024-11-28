@@ -25,6 +25,7 @@ class Package(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     last_modified = models.DateTimeField(auto_now=True)
     download_url = models.URLField(max_length=500, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
 
     def __str__(self):
@@ -106,6 +107,7 @@ class Question(models.Model):
     question_file = models.FileField(upload_to=upload_to, null=True, blank=True)
     question_transfer = models.IntegerField(choices=TRANSFER_CHOICES, blank=True, null=True)
     real_price = models.PositiveIntegerField(blank=True, null=True)
+    answer_time = models.PositiveIntegerField(blank=True, null=True, default=30)
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
