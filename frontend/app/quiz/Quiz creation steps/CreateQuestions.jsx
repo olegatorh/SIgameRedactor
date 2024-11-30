@@ -8,7 +8,7 @@ export default function CreateQuestions() {
     const rounds = useSelector((state) => state.quizApi.quiz.rounds);
     const [updatedRounds, setUpdatedRounds] = useState([]);
     const dispatch = useDispatch()
-
+    const maxFileSize = 50 * 1024 * 1024
 
     useEffect(() => {
         if (rounds && rounds.length > 0) {
@@ -108,6 +108,19 @@ export default function CreateQuestions() {
       handleQuestionChange(roundId, themeId, questionId, 'answer_time', newTime);
     };
 
+    const handleFileValidation = (e, roundId, themeId, questionId) => {
+        const file = e.target.files[0]
+        if (file) {
+            if (file.size > maxFileSize) {
+                alert(`File size should not exceed 50 MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
+                e.target.value = ''
+                return;
+            }
+            handleQuestionChange(roundId, themeId, questionId, 'file', file)
+
+        }
+    }
+
     return (
         <div className="quiz-form">
             {updatedRounds.map((round) => (
@@ -152,7 +165,7 @@ export default function CreateQuestions() {
                                         {question.content_type !== "1" ? (
                                             <input
                                                 type="file"
-                                                onChange={(e) => handleQuestionChange(round.id, theme.id, question.id, 'file', e.target.files[0])}
+                                                onChange={(e) => handleFileValidation(e, round.id, theme.id, question.id)}
                                                 className="form-input"
                                             />
                                         ) : <></>}

@@ -1,8 +1,11 @@
+import os
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
+from configurator.file_processing import process_image, process_audio, process_video
 
 
 def upload_to(instance, filename):
@@ -109,6 +112,18 @@ class Question(models.Model):
     real_price = models.PositiveIntegerField(blank=True, null=True)
     answer_time = models.PositiveIntegerField(blank=True, null=True, default=30)
 
+    def process_file(self):
+        if self.content_type == 2:  # IMAGE
+           return    process_image(self.question_file)
+        elif self.content_type == 3:  # AUDIO
+            return process_audio(self.question_file, self.answer_time)
+        elif self.content_type == 4:  # VIDEO
+            return process_video(self.question_file, self.answer_time)
+        else:
+            return
+
+
+
     def save(self, *args, **kwargs):
         with transaction.atomic():
             rounds_count = Question.objects.select_for_update().filter(theme_id=self.theme_id).count()
@@ -119,7 +134,18 @@ class Question(models.Model):
 
             if not self.real_price :
                 self.real_price = self.question_price
+
             super().save(*args, **kwargs)
+
+        if self.question_file and not hasattr(self, '_file_processed'):
+            self._file_processed = True
+            processed_file, old_file = self.process_file()
+            if processed_file:
+                self.question_file.save(os.path.basename(processed_file.name), processed_file)
+                os.remove(old_file)
+                Question.objects.filter(pk=self.pk).update(question_file=self.question_file)
+
+
 
     def delete(self, *args, **kwargs):
         max_order = Question.objects.filter(theme_id=self.theme_id).aggregate(models.Max('order'))['order__max']
