@@ -51,7 +51,7 @@ class LoginView(APIView):
                 key='refresh_token',
                 value=str(refresh),
                 httponly=True,
-                secure=False if secure else True,
+                secure=True,
                 samesite='None',
             )
 
@@ -60,7 +60,7 @@ class LoginView(APIView):
                 value=str(refresh.access_token),
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite='None',
             )
             print(response)
             return response
@@ -88,7 +88,7 @@ class RefreshTokenView(APIView):
                 value=str(access_token),
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite='None',
             )
             return response
         except Exception as e:
