@@ -4,11 +4,9 @@ from PIL import Image
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.conf import settings
-from moviepy import VideoFileClip
-from pydub.audio_segment import AudioSegment
+from moviepy import VideoFileClip, AudioFileClip
 from rest_framework.exceptions import ValidationError
 
-from configurator.file_processing import process_image, process_audio, process_video
 
 
 def upload_to(instance, filename):
@@ -130,8 +128,6 @@ class Question(models.Model):
         img = img.resize((800, 800))
         new_path = os.path.splitext(self.question_file.path)[0] + ".jpg"
         img.save(new_path, format='JPEG', quality=80)
-        if os.path.exists(self.question_file.path):
-            os.remove(self.question_file.path)
         self.question_file.name = upload_to(self, os.path.basename(new_path))
         return self.question_file
 
@@ -139,12 +135,19 @@ class Question(models.Model):
         file_path = self.question_file.path
         target_bitrate = 320
         max_size = 1 * 1024 * 1024
-        audio = AudioSegment.from_file(file_path)
-        trimmed_audio = audio[:self.answer_time * 1000]
+        audio = AudioFileClip(file_path)
+        audio_duration = audio.duration
+        desired_time = min(self.answer_time, audio_duration)
+        trimmed_audio = audio.subclipped(0, desired_time)
         new_path = os.path.splitext(file_path)[0] + ".mp3"
         while True:
             compressed_path = os.path.splitext(file_path)[0] + f"_{target_bitrate}kbps.mp3"
-            trimmed_audio.export(compressed_path, format="mp3", bitrate=f"{target_bitrate}k")
+
+            trimmed_audio.write_audiofile(
+                compressed_path,
+                codec="libmp3lame",
+                bitrate=f"{target_bitrate}k"
+            )
 
             if os.path.getsize(compressed_path) <= max_size or target_bitrate <= 64:
                 if os.path.exists(file_path):
@@ -161,8 +164,11 @@ class Question(models.Model):
     def process_video(self):
         file_path = self.question_file.path
         new_path = os.path.splitext(file_path)[0] + "_processed.mp4"
-        video = VideoFileClip(file_path).subclipped(0, self.answer_time)
-        video.write_videofile(new_path, codec="libx264", bitrate="800k",  audio_codec="aac")
+        video = VideoFileClip(file_path)
+        video_duration = video.duration
+        desired_time = min(self.answer_time, video_duration)
+        trimmed_video = video.subclipped(0, desired_time)
+        trimmed_video.write_videofile(new_path, codec="libx264", bitrate="800k",  audio_codec="aac")
         if os.path.exists(file_path):
             os.remove(file_path)
         self.question_file.name = upload_to(self, os.path.basename(new_path))
