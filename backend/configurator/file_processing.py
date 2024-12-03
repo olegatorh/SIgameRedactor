@@ -1,11 +1,11 @@
 import os
 
-import ffmpeg
+# import ffmpeg
 from PIL import Image
 from django.core.files.base import ContentFile
 import time
 
-from ffmpeg import overwrite_output
+# from ffmpeg import overwrite_output
 
 
 ##ffmpeg needs to be installed on server
@@ -46,7 +46,7 @@ def process_audio(file_field, answer_time):
                 os.remove(temp_output_file)
                 raise Exception("Unable to compress audio to the desired size without significant quality loss.")
         with open(temp_output_file, 'rb') as f:
-            return ContentFile(f.read(), name=os.path.basename(temp_output_file)), temp_output_file
+            return ContentFile(f.read(), name=os.path.basename(temp_output_file))
 
     except Exception as e:
         raise Exception(f"Audio processing failed: {e}")

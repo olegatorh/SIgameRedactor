@@ -1,8 +1,11 @@
 import os
 
+from PIL import Image
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.conf import settings
+from moviepy import VideoFileClip
+from pydub.audio_segment import AudioSegment
 from rest_framework.exceptions import ValidationError
 
 from configurator.file_processing import process_image, process_audio, process_video
@@ -76,7 +79,7 @@ class Theme(models.Model):
 
 
 
-
+# сейвить шлях в моделі без назви питання
 
 class Question(models.Model):
     CONTENT_CHOICES = [
@@ -114,36 +117,74 @@ class Question(models.Model):
 
     def process_file(self):
         if self.content_type == 2:  # IMAGE
-           return    process_image(self.question_file)
+            self.question_file = self.process_image()
         elif self.content_type == 3:  # AUDIO
-            return process_audio(self.question_file, self.answer_time)
+            self.question_file =self.process_audio()
         elif self.content_type == 4:  # VIDEO
-            return process_video(self.question_file, self.answer_time)
-        else:
-            return
+            self.question_file = self.process_video()
 
+    def process_image(self):
+        img = Image.open(self.question_file.path)
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
+        img = img.resize((800, 800))
+        new_path = os.path.splitext(self.question_file.path)[0] + ".jpg"
+        img.save(new_path, format='JPEG', quality=80)
+        if os.path.exists(self.question_file.path):
+            os.remove(self.question_file.path)
+        self.question_file.name = upload_to(self, os.path.basename(new_path))
+        return self.question_file
+
+    def process_audio(self):
+        file_path = self.question_file.path
+        target_bitrate = 320
+        max_size = 1 * 1024 * 1024
+        audio = AudioSegment.from_file(file_path)
+        trimmed_audio = audio[:self.answer_time * 1000]
+        new_path = os.path.splitext(file_path)[0] + ".mp3"
+        while True:
+            compressed_path = os.path.splitext(file_path)[0] + f"_{target_bitrate}kbps.mp3"
+            trimmed_audio.export(compressed_path, format="mp3", bitrate=f"{target_bitrate}k")
+
+            if os.path.getsize(compressed_path) <= max_size or target_bitrate <= 64:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                os.rename(compressed_path, new_path)
+                break
+
+            os.remove(compressed_path)
+            target_bitrate -= 32
+
+        self.question_file.name = upload_to(self, os.path.basename(new_path))
+        return self.question_file
+
+    def process_video(self):
+        file_path = self.question_file.path
+        new_path = os.path.splitext(file_path)[0] + "_processed.mp4"
+        video = VideoFileClip(file_path).subclipped(0, self.answer_time)
+        video.write_videofile(new_path, codec="libx264", bitrate="800k",  audio_codec="aac")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        self.question_file.name = upload_to(self, os.path.basename(new_path))
+        return self.question_file
 
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
             rounds_count = Question.objects.select_for_update().filter(theme_id=self.theme_id).count()
-            print(rounds_count, 'rounds_count')
             if rounds_count >= 10:
                 raise ValidationError("You can only add up to 10 questions per theme.")
             self.order = rounds_count + 1
-
             if not self.real_price :
                 self.real_price = self.question_price
-
             super().save(*args, **kwargs)
+            if self.question_file:
+                self.process_file()
+                if self.question_file:
+                    super().save(update_fields=['question_file'])
 
-        if self.question_file and not hasattr(self, '_file_processed'):
-            self._file_processed = True
-            processed_file, old_file = self.process_file()
-            if processed_file:
-                self.question_file.save(os.path.basename(processed_file.name), processed_file)
-                os.remove(old_file)
-                Question.objects.filter(pk=self.pk).update(question_file=self.question_file)
+
+
 
 
 
