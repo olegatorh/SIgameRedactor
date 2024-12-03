@@ -14,8 +14,21 @@
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensures the container fills the viewport height */
+}
+
+/* Main content area should take all available space */
+.main {
+  flex: 1; /* Pushes the footer to the bottom */
+  text-align: center;
+  padding: 2rem;
 }

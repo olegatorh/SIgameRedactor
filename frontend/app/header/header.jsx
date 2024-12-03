@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from '@/store/authSlice';
 import './Header.css';
+import {resetQuizState} from "@/store/quizSlice";
 
 const Header = ({ children }) => {
   const router = useRouter();
@@ -12,6 +13,7 @@ const Header = ({ children }) => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(resetQuizState());
     router.push('/login');
   };
 
@@ -21,17 +23,17 @@ const Header = ({ children }) => {
         <nav className="nav">
           <div className="nav-left">
             <button className="nav-button" onClick={() => router.push('/')}>Home</button>
-            {auth.access_token && (
+            {auth.isAuthenticated && (
               <button className="nav-button" onClick={() => router.push('/library')}>Quiz Library</button>
             )}
           </div>
-          {auth.access_token && (
+          {auth.isAuthenticated && (
             <div className="nav-center">
               <button className="nav-button" onClick={() => router.push('/quiz')}>Quiz Redactor</button>
             </div>
           )}
           <div className="nav-right">
-            {!auth.access_token ? (
+            {!auth.isAuthenticated ? (
               <>
                 <button className="nav-button" onClick={() => router.push('/login')}>Login</button>
                 <button className="nav-button" onClick={() => router.push('/register')}>Register</button>

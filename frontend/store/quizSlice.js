@@ -1,17 +1,14 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axiosInstance from "@/app/services/axiosInstance";
-import {logout} from "@/store/authSlice";
+
+
+
 
 
 export const createQuiz = createAsyncThunk('quizApi/createQuiz', async (quizData, {rejectWithValue, getState}) => {
     try {
-        const {auth} = getState();
         const response = await axiosInstance.post(`/quiz/packages/`, quizData, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`,
-            },
         });
-        console.log(response)
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -19,14 +16,11 @@ export const createQuiz = createAsyncThunk('quizApi/createQuiz', async (quizData
 });
 
 
-export const createTags = createAsyncThunk('quizApi/createTag', async (quizData, {rejectWithValue, getState}) => {
+export const createTags =
+    createAsyncThunk('quizApi/createTag', async (quizData,
+                                                 {rejectWithValue}) => {
     try {
-        const {auth} = getState();
-        console.log('tag request', quizData)
         const response = await axiosInstance.post('quiz/tag/', quizData, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`,
-            },
         })
         return response.data;
     } catch (error) {
@@ -34,14 +28,10 @@ export const createTags = createAsyncThunk('quizApi/createTag', async (quizData,
     }
 })
 
-export const createRound = createAsyncThunk('quizApi/createRound', async (quizData, {rejectWithValue, getState}) => {
+export const createRound = createAsyncThunk('quizApi/createRound',
+    async (quizData, {rejectWithValue}) => {
     try {
-        const {auth} = getState();
-        console.log('create round', quizData)
         const response = await axiosInstance.post('quiz/round/', quizData, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`,
-            },
         })
         return response.data;
     } catch (error) {
@@ -49,14 +39,10 @@ export const createRound = createAsyncThunk('quizApi/createRound', async (quizDa
     }
 })
 
-export const createTheme = createAsyncThunk('quizApi/createTheme', async (quizData, {rejectWithValue, getState}) => {
+export const createTheme =
+    createAsyncThunk('quizApi/createTheme', async (quizData, {rejectWithValue}) => {
     try {
-        const {auth} = getState();
-        console.log('create theme', quizData)
         const response = await axiosInstance.post('quiz/theme/', quizData, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`,
-            },
         })
         return response.data;
     } catch (error) {
@@ -66,11 +52,9 @@ export const createTheme = createAsyncThunk('quizApi/createTheme', async (quizDa
 
 
 export const createQuestion = createAsyncThunk('quizApi/createQuestion', async (quizData, {
-    rejectWithValue, getState
+    rejectWithValue
 }) => {
     try {
-        const {auth} = getState();
-        console.log('create question', quizData)
         const formData = new FormData();
         formData.append('question', quizData.question);
         formData.append('question_type', quizData.question_type);
@@ -90,31 +74,20 @@ export const createQuestion = createAsyncThunk('quizApi/createQuestion', async (
         }
 
         const response = await axiosInstance.post('quiz/question/', formData, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`, 'Content-Type': 'multipart/form-data',
-            },
         })
-        console.log('created question ', response.data)
         return response.data;
     } catch (error) {
-        console.log('create questionm ', error.response)
         return rejectWithValue(error.response.status);
     }
 })
 
 
 export const downloadQuiz = createAsyncThunk('quizApi/downloadQuiz', async (quizData, {
-    rejectWithValue,
-    getState
+    rejectWithValue
 }) => {
     try {
-        const {auth} = getState();
         const response = await axiosInstance.get(`/quiz/download/${quizData}/`, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`,
-            },
         });
-        console.log(response)
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -122,17 +95,10 @@ export const downloadQuiz = createAsyncThunk('quizApi/downloadQuiz', async (quiz
 });
 
 export const getCompletedQuizzes = createAsyncThunk('quizApi/getQuizzes', async (quizData, {
-    rejectWithValue,
-    getState
+    rejectWithValue
 }) => {
     try {
-        const {auth} = getState();
-        const response = await axiosInstance.get(`/quiz/completed/`, {
-            headers: {
-                Authorization: `Bearer ${auth.access_token}`,
-            },
-        });
-        console.log(response)
+        const response = await axiosInstance.get(`/quiz/completed/`);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -163,9 +129,6 @@ const quizApiSlice = createSlice({
     }
     }, extraReducers: (builder) => {
         builder
-             .addCase(logout, (state) => {
-                quizApiSlice.caseReducers.resetQuizState(state);
-            })
             .addCase(createQuiz.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -277,3 +240,6 @@ const quizApiSlice = createSlice({
 
 export const {updateStep, resetQuizState} = quizApiSlice.actions;
 export default quizApiSlice.reducer;
+
+
+

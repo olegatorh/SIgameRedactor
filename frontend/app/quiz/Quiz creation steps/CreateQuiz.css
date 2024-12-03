@@ -217,7 +217,7 @@
 
 .add-question-button {
     margin-bottom: 1rem;
-    background-color: #007bff;
+    background-color: #4CAF50;
     color: #fff;
     padding: 0.5rem 1rem;
     border: none;
@@ -228,7 +228,7 @@
 }
 
 .add-question-button:hover {
-    background-color: #0056b3;
+    background-color: rgba(67, 146, 70, 0.71);;
 }
 
 .remove-question-button:hover {
@@ -320,20 +320,20 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #007bff;
+  background: #4CAF50;
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .styled-range::-webkit-slider-thumb:hover {
-  background: #0056b3;
+  background: rgba(67, 146, 70, 0.71);
 }
 
 .styled-range::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: #007bff;
+  background: #4CAF50;
   border-radius: 50%;
   cursor: pointer;
 }

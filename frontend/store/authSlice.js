@@ -6,12 +6,13 @@ const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL; // Адреса вашог
 
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
-    const response = await axios.post(`${API_URL}/users/login/`, credentials);
-    return response.data;
+    await axios.post(`${API_URL}/users/login/`, credentials, {withCredentials: true});
+    return true;
   } catch (error) {
     return rejectWithValue(error.response.data);
   }
 });
+
 
 export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
@@ -23,12 +24,13 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
 });
 
 
+
+
 const initialState = {
-  access_token: localStorage.getItem('access_token') || null,
-  refresh_token: localStorage.getItem('refresh_token') || null,
   isLoading: false,
   error: null,
   successMessage: null,
+  isAuthenticated: false
 };
 
 const authSlice = createSlice({
@@ -36,16 +38,8 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.access_token = null;
-      state.refresh_token = null;
-      state.successMessage = null;
+      state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-    },
-    updateToken: (state, action) => {
-      state.access_token = action.payload.access;
-      state.refresh_token = action.payload.refresh;
     },
   },
   extraReducers: (builder) => {
@@ -56,9 +50,7 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log('login fullfiled', action.payload)
-        state.access_token = action.payload.access;
-        state.refresh_token = action.payload.refresh;
+        state.isAuthenticated = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -71,14 +63,15 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.successMessage = "Registration successful! Please log in.";
+        state.successMessage = 'Registration successful! Please log in.';
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload?.message || "Registration failed.";
+        state.error = action.payload?.message || 'Registration failed.';
       });
   },
 });
+
 
 export const { logout , updateToken} = authSlice.actions;
 export default authSlice.reducer;

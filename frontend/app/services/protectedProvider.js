@@ -4,16 +4,16 @@ import { useEffect } from 'react';
 
 
 const ProtectedRoute = ({ children }) => {
-  const user = useSelector((state) => state.auth.access_token)
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
+    if (!isAuthenticated) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [isAuthenticated, router]);
 
-  return user ? children : null;
+  return isAuthenticated ? children : null;
 };
 
 export default ProtectedRoute;

@@ -15,17 +15,15 @@ const LoginComponent = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const result = await dispatch(login(credentials));
-      localStorage.setItem('access_token', result.payload.access);
-      localStorage.setItem('refresh_token', result.payload.refresh);
+    await dispatch(login(credentials));
   };
 
 
   useEffect(() => {
-    if (auth.access_token) {
+    if (auth.isAuthenticated) {
       router.push('/');
     }
-  }, [auth.access_token, router])
+  }, [auth, router])
 
   return (
     <div className="login-container">

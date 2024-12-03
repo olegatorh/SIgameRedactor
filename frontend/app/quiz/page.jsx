@@ -12,11 +12,13 @@ import CreateQuestions from "@/app/quiz/Quiz creation steps/CreateQuestions";
 import CreateTemplate from "@/app/quiz/Quiz creation steps/CreateTemplate";
 import QuizVisualisation from "@/app/quiz/vizualization";
 import ProtectedRoute from "@/app/services/protectedProvider";
+import Footer from "@/app/header/footer";
 
 export default function Quiz() {
   const currentStep = useSelector((state) => state.quizApi.current_step);
 
   return (
+      <>
       <Header>
           <ProtectedRoute>
               <div style={{display: 'flex', gap: '20px'}}>
@@ -32,6 +34,8 @@ export default function Quiz() {
                   </div>
           </ProtectedRoute>
       </Header>
+          <Footer/>
+      </>
 
 );
 }
