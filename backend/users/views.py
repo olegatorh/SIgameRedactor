@@ -5,8 +5,9 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 
 from .serializers import UserSerializer, LoginSerializer, TokenSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -36,7 +37,6 @@ class LoginView(APIView):
         request=LoginSerializer,
     )
     def post(self, request):
-        secure = False if DEBUG == 'True' else True
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data
@@ -75,12 +75,14 @@ class RefreshTokenView(APIView):
         request=TokenSerializer,
     )
     def post(self, request):
-        refresh_token = request.COOKIES.get("refresh")
-        secure = False if DEBUG == 'True' else True
+        refresh_token = request.COOKIES.get("refresh_token")
         if refresh_token is None:
             return Response({"error": "Refresh token is required"}, status=status.HTTP_403_FORBIDDEN)
         try:
             refresh = RefreshToken(refresh_token)
+            if BlacklistedToken.objects.filter(token__jti=refresh['jti']).exists():
+                return Response({"error": "Token is blacklisted"}, status=status.HTTP_403_FORBIDDEN)
+
             access_token = refresh.access_token
             response = Response({"access_token": str(access_token)})
             response.set_cookie(
@@ -94,6 +96,16 @@ class RefreshTokenView(APIView):
         except Exception as e:
             return Response({"error": "Invalid refresh token"}, status=403)
 
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        response = Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+        response.delete_cookie('refresh_token', path='/')
+        response.delete_cookie('access_token', path='/')
+
+        return response
 
 class UserView(APIView):
     def get(self, request):

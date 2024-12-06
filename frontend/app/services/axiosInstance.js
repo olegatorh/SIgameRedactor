@@ -1,7 +1,5 @@
 import axios from 'axios';
-import Cookies from 'js-cookie'; // Якщо кукі не HttpOnly
-import { logout } from '@/store/authSlice';
-import {useDispatch} from "react-redux";
+import Cookies from "js-cookie";
 
 
 const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -13,7 +11,7 @@ const axiosInstance = axios.create({
 
 const refreshAccessToken = async () => {
   try {
-    const response = await axios.post(`${API_URL}/users/refresh/`, {}, { withCredentials: true });
+    const response = await axios.post(`${API_URL}/users/token/refresh/`, {}, { withCredentials: true });
     return response.data;
   } catch (error) {
     throw error;
@@ -21,27 +19,36 @@ const refreshAccessToken = async () => {
 };
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('Successful response:', response);
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
-    const dispatch = useDispatch();
+    console.log('Error intercepted:', error.response);
+    console.log('originalRequest._retry:', originalRequest._retry);
+    console.log('originalRequest._retry:', originalRequest);
+    console.log('error.response.status:', error.response.status);
+    console.log('error.response?.status:', error.response?.status);
 
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+      console.log('Attempting token refresh...');
       originalRequest._retry = true;
       try {
-        const newTokens = await refreshAccessToken();
-
-        originalRequest.headers['Authorization'] = `Bearer ${newTokens.access}`;
+        // const newTokens = await refreshAccessToken();
+        // originalRequest.headers['Authorization'] = `Bearer ${newTokens.access}`;
+        await refreshAccessToken();
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        dispatch(logout());
+        console.error('Token refresh failed:', refreshError.response?.data || refreshError.message);
         return Promise.reject(refreshError);
       }
     }
 
+    console.error('Request failed:', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
+
 
 export default axiosInstance;

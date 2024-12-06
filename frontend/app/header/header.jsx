@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from '@/store/authSlice';
 import './Header.css';
 import {resetQuizState} from "@/store/quizSlice";
+import {logout} from "@/store/authSlice";
 
 const Header = ({ children }) => {
   const router = useRouter();

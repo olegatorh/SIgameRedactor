@@ -24,6 +24,15 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
 });
 
 
+export const logout = createAsyncThunk('auth/logout', async () => {
+  try {
+    const response = await axios.post(`${API_URL}/users/logout/`, {});
+    console.log(response.data.message);
+  } catch (error) {
+    console.error("Logout failed", error.response.data);
+  }
+});
+
 
 
 const initialState = {
@@ -37,10 +46,6 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout: (state) => {
-      state.isAuthenticated = false;
-      state.error = null;
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -68,10 +73,23 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || 'Registration failed.';
+      })
+      .addCase(logout.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(logout.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = false
+        state.successMessage = 'logout successful! Please log in.';
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || 'logout failed.';
       });
   },
 });
 
 
-export const { logout , updateToken} = authSlice.actions;
 export default authSlice.reducer;

@@ -6,6 +6,7 @@ from django.db import models, transaction
 from django.conf import settings
 from moviepy import VideoFileClip, AudioFileClip
 from rest_framework.exceptions import ValidationError
+import tempfile
 
 
 
@@ -133,32 +134,27 @@ class Question(models.Model):
 
     def process_audio(self):
         file_path = self.question_file.path
-        target_bitrate = 320
         max_size = 1 * 1024 * 1024
-        audio = AudioFileClip(file_path)
-        audio_duration = audio.duration
-        desired_time = min(self.answer_time, audio_duration)
-        trimmed_audio = audio.subclipped(0, desired_time)
-        new_path = os.path.splitext(file_path)[0] + ".mp3"
-        while True:
-            compressed_path = os.path.splitext(file_path)[0] + f"_{target_bitrate}kbps.mp3"
+        compressed_path = os.path.splitext(file_path)[0] + "_compressed.mp3"
+
+        with AudioFileClip(file_path) as audio:
+            audio_duration = audio.duration
+            desired_time = min(self.answer_time, audio_duration)
+
+            trimmed_audio = audio.subclipped(0, desired_time)
 
             trimmed_audio.write_audiofile(
                 compressed_path,
                 codec="libmp3lame",
-                bitrate=f"{target_bitrate}k"
+                bitrate="128k"
             )
+        if os.path.getsize(compressed_path) > max_size:
+            raise ValueError("Compressed file is still too large.")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        os.rename(compressed_path, file_path)
 
-            if os.path.getsize(compressed_path) <= max_size or target_bitrate <= 64:
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                os.rename(compressed_path, new_path)
-                break
-
-            os.remove(compressed_path)
-            target_bitrate -= 32
-
-        self.question_file.name = upload_to(self, os.path.basename(new_path))
+        self.question_file.name = upload_to(self, os.path.basename(file_path))
         return self.question_file
 
     def process_video(self):
