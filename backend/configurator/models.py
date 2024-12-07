@@ -127,15 +127,20 @@ class Question(models.Model):
         if img.mode == 'RGBA':
             img = img.convert('RGB')
         img = img.resize((800, 800))
-        new_path = os.path.splitext(self.question_file.path)[0] + ".jpg"
+        base_dir = os.path.dirname(self.question_file.path)
+        new_filename = f"question_{self.id}_image.jpg"
+        new_path = os.path.join(base_dir, new_filename)
         img.save(new_path, format='JPEG', quality=80)
-        self.question_file.name = upload_to(self, os.path.basename(new_path))
+        os.remove(self.question_file.path)
+        self.question_file.name = upload_to(self, new_filename)
         return self.question_file
 
     def process_audio(self):
         file_path = self.question_file.path
         max_size = 1 * 1024 * 1024
-        compressed_path = os.path.splitext(file_path)[0] + "_compressed.mp3"
+        base_dir = os.path.dirname(self.question_file.path)
+        new_filename = f"question_{self.id}_audio.mp3"
+        new_path = os.path.join(base_dir, new_filename)
 
         with AudioFileClip(file_path) as audio:
             audio_duration = audio.duration
@@ -144,30 +149,29 @@ class Question(models.Model):
             trimmed_audio = audio.subclipped(0, desired_time)
 
             trimmed_audio.write_audiofile(
-                compressed_path,
+                new_path,
                 codec="libmp3lame",
                 bitrate="128k"
             )
-        if os.path.getsize(compressed_path) > max_size:
+        if os.path.getsize(new_path) > max_size:
             raise ValueError("Compressed file is still too large.")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        os.rename(compressed_path, file_path)
+        os.remove(self.question_file.path)
 
-        self.question_file.name = upload_to(self, os.path.basename(file_path))
+        self.question_file.name = upload_to(self, new_filename)
         return self.question_file
 
     def process_video(self):
         file_path = self.question_file.path
-        new_path = os.path.splitext(file_path)[0] + "_processed.mp4"
+        base_dir = os.path.dirname(self.question_file.path)
+        new_filename = f"question_{self.id}_video.mp4"
+        new_path = os.path.join(base_dir, new_filename)
         video = VideoFileClip(file_path)
         video_duration = video.duration
         desired_time = min(self.answer_time, video_duration)
         trimmed_video = video.subclipped(0, desired_time)
         trimmed_video.write_videofile(new_path, codec="libx264", bitrate="800k",  audio_codec="aac")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        self.question_file.name = upload_to(self, os.path.basename(new_path))
+        os.remove(self.question_file.path)
+        self.question_file.name = upload_to(self, new_filename)
         return self.question_file
 
 
