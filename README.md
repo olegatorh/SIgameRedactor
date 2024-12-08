@@ -1,4 +1,4 @@
-# sigame quiz creator
+# sigame quiz redactor
 
 Create your quiz in browser
 
