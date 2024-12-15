@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL; // Адреса вашого бекенду
+const API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
@@ -16,6 +16,8 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
 
 export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
+    console.log(API_URL)
+    console.log('API URL:', process.env.NEXT_PUBLIC_BASE_API_URL);
     const response = await axios.post(`${API_URL}/users/register/`, userData);
     return response.data;
   } catch (error) {

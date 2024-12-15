@@ -66,7 +66,12 @@ export default function Content() {
                 </div>
                 <button
                   className="downloadButton"
-                  onClick={() => window.open(quizItem.download_url, '_blank')}
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = quizItem.download_url;
+                    link.download = quizItem.title;
+                    link.click();
+                  }}
                 >
                   Завантажити файл
                 </button>

@@ -52,7 +52,7 @@ class LoginView(APIView):
                 value=str(refresh),
                 httponly=True,
                 secure=True,
-                samesite='None',
+                samesite='Lax',
             )
 
             response.set_cookie(
@@ -60,7 +60,7 @@ class LoginView(APIView):
                 value=str(refresh.access_token),
                 httponly=True,
                 secure=True,
-                samesite='None',
+                samesite='Lax',
             )
             print(response)
             return response
@@ -90,7 +90,7 @@ class RefreshTokenView(APIView):
                 value=str(access_token),
                 httponly=True,
                 secure=True,
-                samesite='None',
+                samesite='Lax',
             )
             return response
         except Exception as e:

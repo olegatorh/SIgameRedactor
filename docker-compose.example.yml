@@ -1,0 +1,52 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: backend_siquestor
+    command: >
+      sh -c " 
+      python manage.py wait_for_db &&
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py create_superuser_script &&
+      python manage.py runserver 0.0.0.0:1337
+      "
+    ports:
+      - ${BACKEND_PORTS}
+    depends_on:
+      - db
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend_siquestor
+    ports:
+      - ${FRONTEND_PORTS}
+    depends_on:
+      - backend
+#
+#  nginx:
+#    image: nginx:latest
+#    container_name: nginx_siquestor
+#    ports:
+#      - "8080:80"
+#      - "8443:443"
+#    volumes:
+#      - ./media:/app/media
+#    depends_on:
+#      - backend
+
+  db:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
