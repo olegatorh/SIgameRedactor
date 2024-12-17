@@ -16,21 +16,25 @@ def upload_to(instance, filename):
 
 
 class Package(models.Model):
-
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('completed', 'Completed'),
+    STEP_CHOICES = [
+        (1, 'CreateQuiz'),
+        (2, 'CreateTags'),
+        (3, 'CreateRounds'),
+        (4, 'CreateThemes'),
+        (5, 'CreateQuestions'),
+        (6, 'Completed'),
     ]
+
 
     title = models.CharField(max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
     difficulty = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], help_text="value should be from 1 to 10")
     author = models.CharField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     last_modified = models.DateTimeField(auto_now=True)
     download_url = models.URLField(max_length=500, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    current_step = models.IntegerField(default=1, choices=STEP_CHOICES)
 
 
     def __str__(self):

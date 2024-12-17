@@ -1,17 +1,16 @@
 import {useState} from "react";
 import './CreateQuiz.css';
-import {createQuiz, updateStep} from "@/store/quizSlice";
-import {useDispatch} from "react-redux";
+import {createQuiz, updateCurrentStep, updateStep} from "@/store/quizSlice";
+import {useDispatch, useSelector} from "react-redux";
 
 export default function CreateQuiz() {
-    const [quizInfo, setquizInfo] = useState({title: '', difficulty: 1, author: '', description: ''});
+    const [quizInfo, setquizInfo] = useState({title: '', difficulty: 1, author: '', description: '', current_step: 2});
     const dispatch = useDispatch();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             await dispatch(createQuiz(quizInfo)).unwrap();
-            dispatch(updateStep())
         } catch (error) {
             alert(error)
         }

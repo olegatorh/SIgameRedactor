@@ -26,7 +26,7 @@ staticfiles/
 
 # Local environment
 .env
-.env.*
+
 
 # macOS
 .DS_Store

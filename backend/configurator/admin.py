@@ -4,7 +4,7 @@ from .models import Package, Tag, Round, Theme, Question
 
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'date', 'difficulty', 'author', 'status', 'last_modified', 'id', 'download_url', 'description')
+    list_display = ('title', 'user', 'date', 'difficulty', 'author', 'current_step', 'last_modified', 'id', 'download_url', 'description')
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

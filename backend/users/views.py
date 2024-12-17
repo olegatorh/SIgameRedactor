@@ -12,8 +12,7 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from .serializers import UserSerializer, LoginSerializer, TokenSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-DEBUG = os.getenv('DEBUG')
-
+samesite = 'none' if os.getenv('DJANGO_DEBUG')=='True' else 'lax'
 
 class RegisterUserView(generics.CreateAPIView):
     queryset = get_user_model().objects.all()
@@ -52,7 +51,7 @@ class LoginView(APIView):
                 value=str(refresh),
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite=samesite,
             )
 
             response.set_cookie(
@@ -60,7 +59,7 @@ class LoginView(APIView):
                 value=str(refresh.access_token),
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite=samesite,
             )
             print(response)
             return response
@@ -90,7 +89,7 @@ class RefreshTokenView(APIView):
                 value=str(access_token),
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite=samesite,
             )
             return response
         except Exception as e:

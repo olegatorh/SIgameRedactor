@@ -2,13 +2,14 @@ import {useState} from "react";
 import './CreateQuiz.css';
 import {useDispatch, useSelector} from "react-redux";
 import {CreateRoundsHelper} from "@/app/services/QuizCreateHelper";
-import {updateStep} from "@/store/quizSlice";
+import {createTags, updateCurrentStep, updateStep} from "@/store/quizSlice";
 
 export default function CreateRounds() {
     const [roundData, setRoundData] = useState([{name: ''}]);
     const [isFinalRound, setIsTrue] = useState(false); // State for true/false
     const dispatch = useDispatch();
     const quizId = useSelector((state) => state.quizApi.quiz.id);
+    const current_step = useSelector((state) => state.quizApi.quiz.current_step);
     const handleRoundNameChange = (index, value) => {
         const updatedRounds = [...roundData];
         updatedRounds[index].name = value;
@@ -30,6 +31,7 @@ export default function CreateRounds() {
         try {
             await CreateRoundsHelper(roundData, quizId, isFinalRound,  dispatch);
             console.log("Rounds created successfully:");
+            await dispatch(updateCurrentStep({'id': quizId, 'current_step': current_step + 1}))
             dispatch(updateStep())
         } catch (error) {
             console.error("Failed to create rounds:", error);

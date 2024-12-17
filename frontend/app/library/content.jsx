@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getCompletedQuizzes } from "@/store/quizSlice";
 import "./Content.css";
 
-export default function Content() {
+export default function Content({getQuizzes, value}) {
   const dispatch = useDispatch();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,8 +16,9 @@ export default function Content() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const resultAction = await dispatch(getCompletedQuizzes());
-        if (getCompletedQuizzes.fulfilled.match(resultAction)) {
+        const resultAction = await dispatch(getQuizzes(value));
+        console.log('resultAction', resultAction)
+        if (getQuizzes.fulfilled.match(resultAction)) {
           setQuizzes(resultAction.payload.reverse());
         } else {
           setError(resultAction.payload?.message || "Failed to fetch quizzes");
@@ -59,7 +59,7 @@ export default function Content() {
                 <div className="cardContent">
                   <strong>Title: {quizItem.title}</strong>
                   <p>Date: {quizItem.date}</p>
-                  <p>Status: <strong>{quizItem.status}</strong></p>
+                  <p>Status: <strong>{quizItem.currentStep}</strong></p>
                   <p>Difficulty: {quizItem.difficulty}</p>
                   <p>Author: {quizItem.author}</p>
                   <p>Description: {quizItem.description}</p>

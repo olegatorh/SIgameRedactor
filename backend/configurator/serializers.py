@@ -67,6 +67,7 @@ class RoundDownloadSerializer(serializers.ModelSerializer):
 class PackageDownloadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     rounds = RoundDownloadSerializer(many=True, read_only=True)
+
     class Meta:
         model = Package
         fields = '__all__'

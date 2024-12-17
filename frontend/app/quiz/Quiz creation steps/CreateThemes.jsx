@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import './CreateQuiz.css';
 import { useDispatch, useSelector } from "react-redux";
-import { updateStep } from "@/store/quizSlice";
+import {updateCurrentStep, updateStep} from "@/store/quizSlice";
 import {CreateThemesHelper} from "@/app/services/QuizCreateHelper";
 
 export default function CreateThemes() {
     const rounds = useSelector((state) => state.quizApi.quiz.rounds);
     const [themes, setThemes] = useState([]);
     const dispatch = useDispatch();
+    const current_step = useSelector((state) => state.quizApi.quiz.current_step);
+    const quizId = useSelector((state) => state.quizApi.quiz.id);
 
     useEffect(() => {
         if (rounds) {
@@ -43,6 +45,7 @@ export default function CreateThemes() {
         try {
             console.log('themes', themes);
             await CreateThemesHelper(themes, dispatch);
+            await dispatch(updateCurrentStep({'id': quizId, 'current_step': current_step + 1}))
             dispatch(updateStep())
         } catch (error) {
             alert(error.message);

@@ -10,5 +10,6 @@ class ConfiguratorConfig(AppConfig):
     name = "configurator"
 
     def ready(self):
+        import configurator.signals
         media_path = os.path.join(settings.MEDIA_ROOT, "packages")
         os.makedirs(media_path, exist_ok=True)

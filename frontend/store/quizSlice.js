@@ -94,6 +94,18 @@ export const downloadQuiz = createAsyncThunk('quizApi/downloadQuiz', async (quiz
     }
 });
 
+
+export const updateCurrentStep = createAsyncThunk('quizApi/quiz/updateStep', async (quizData, {
+    rejectWithValue
+}) => {
+    try {
+        const response = await axiosInstance.patch(`/quiz/packages/${quizData.id}/`, {'current_step': quizData.current_step});
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+});
+
 export const getCompletedQuizzes = createAsyncThunk('quizApi/getQuizzes', async (quizData, {
     rejectWithValue
 }) => {
@@ -105,28 +117,45 @@ export const getCompletedQuizzes = createAsyncThunk('quizApi/getQuizzes', async 
     }
 });
 
+export const getDraftQuiz = createAsyncThunk('quizApi/getDraftQuiz', async (quizData, {
+    rejectWithValue
+}) => {
+    try {
+        if (quizData) {
+            const response = await axiosInstance.get(`quiz/draft/?${quizData}`)
+            return response.data
+        } else {
+            const response = await axiosInstance.get(`quiz/draft/`)
+            return response.data
+        }
+        } catch (error) {
+        return rejectWithValue(error.response.data)
+        }
+})
 
 
 const quizApiSlice = createSlice({
     name: 'quizApi', initialState: {
         quiz: {},
-        current_step: 1,
         isLoading: false,
         error: null,
         successMessage: null
     }, reducers: {
-        updateStep: (state) => {
-            state.current_step += 1
-            state.successMessage = null
-            state.error = null
+        updateStep : (state) => {
+          state.quiz.current_step += 1
         },
         resetQuizState: (state) => {
               state.quiz = {};
-              state.current_step = 1;
               state.isLoading = false;
               state.error = null;
               state.successMessage = null;
-    }
+    },
+        updateCurrentQuiz : (state, action) => {
+              state.quiz = {...action.payload.payload}
+              state.isLoading = false;
+              state.error = null;
+              state.successMessage = null;
+        }
     }, extraReducers: (builder) => {
         builder
             .addCase(createQuiz.pending, (state) => {
@@ -235,10 +264,22 @@ const quizApiSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload?.message || "getting all Quizzes failed!";
             })
+            .addCase(getDraftQuiz.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getDraftQuiz.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.successMessage = "getting draft Quizzes successful!";
+            })
+            .addCase(getDraftQuiz.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload?.message || "getting draft Quizzes failed!";
+            })
     },
 });
 
-export const {updateStep, resetQuizState} = quizApiSlice.actions;
+export const {updateStep, resetQuizState, updateCurrentQuiz} = quizApiSlice.actions;
 export default quizApiSlice.reducer;
 
 
