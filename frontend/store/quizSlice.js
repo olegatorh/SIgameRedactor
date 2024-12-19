@@ -1,5 +1,6 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axiosInstance from "@/app/services/axiosInstance";
+import axios, {create} from "axios";
 
 
 
@@ -116,6 +117,19 @@ export const getCompletedQuizzes = createAsyncThunk('quizApi/getQuizzes', async 
         return rejectWithValue(error.response.data);
     }
 });
+
+
+export const deleteQuiz = createAsyncThunk('quizApi/deleteQuiz', async (quizData, {
+    rejectWithValue
+}) => {
+    try {
+        const response = await axiosInstance.delete(`quiz/packages/${quizData}/`)
+        return { id: quizData, message: response.data.message }
+    } catch (error) {
+        return rejectWithValue(error.response.data)
+    }
+})
+
 
 export const getDraftQuiz = createAsyncThunk('quizApi/getDraftQuiz', async (quizData, {
     rejectWithValue
@@ -275,6 +289,24 @@ const quizApiSlice = createSlice({
             .addCase(getDraftQuiz.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload?.message || "getting draft Quizzes failed!";
+            })
+            .addCase(deleteQuiz.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(deleteQuiz.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.successMessage = "getting draft Quizzes successful!";
+                if (state.quiz.id === action.payload.id) {
+                    state.quiz = {}
+                    state.isLoading = false;
+                    state.error = null;
+                    state.successMessage = null;
+                }
+            })
+            .addCase(deleteQuiz.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload?.message || "deleting draft Quiz failed!";
             })
     },
 });

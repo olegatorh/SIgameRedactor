@@ -36,19 +36,6 @@
   font-weight: bold;
 }
 
-.downloadButton {
-  padding: 10px;
-  background-color: #4CAF50;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.downloadButton:hover {
-  background-color: rgba(67, 146, 70, 0.71);
-}
 
 .pagination {
   display: flex;
@@ -100,4 +87,42 @@
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.downloadButton {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.downloadButton:hover {
+  background-color: rgba(67, 146, 70, 0.71);
+}
+
+.deleteButton {
+  padding: 10px;
+  background-color: red;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.deleteButton:hover {
+  background-color: rgba(255, 0, 0, 0.8);
 }

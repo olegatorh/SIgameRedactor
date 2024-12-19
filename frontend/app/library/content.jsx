@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./Content.css";
+import {deleteQuiz} from "@/store/quizSlice";
 
 export default function Content({getQuizzes, value}) {
   const dispatch = useDispatch();
@@ -11,13 +12,12 @@ export default function Content({getQuizzes, value}) {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
         const resultAction = await dispatch(getQuizzes(value));
-        console.log('resultAction', resultAction)
         if (getQuizzes.fulfilled.match(resultAction)) {
           setQuizzes(resultAction.payload.reverse());
         } else {
@@ -31,13 +31,23 @@ export default function Content({getQuizzes, value}) {
     };
 
     fetchQuizzes();
-  }, [dispatch]);
+  }, [dispatch, refreshKey]);
 
 
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  const deleteQuizHandler = async (id) => {
+      const result = await dispatch(deleteQuiz(id))
+      if (deleteQuiz.fulfilled.match(result)) {
+      setRefreshKey((prevKey) => prevKey + 1);
+      } else {
+        console.error("Failed to delete quiz:", result.payload);
+      }
+
+  }
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -55,38 +65,49 @@ export default function Content({getQuizzes, value}) {
         <div>
           <div className="list fillContainer">
             {currentQuizzes.map((quizItem) => (
-              <div key={quizItem.id} className="card smallCard">
-                <div className="cardContent">
-                  <strong>Title: {quizItem.title}</strong>
-                  <p>Date: {quizItem.date}</p>
-                  <p>Status: <strong>{quizItem.currentStep}</strong></p>
-                  <p>Difficulty: {quizItem.difficulty}</p>
-                  <p>Author: {quizItem.author}</p>
-                  <p>Description: {quizItem.description}</p>
+                <div key={quizItem.id} className="card smallCard">
+                  <div className="cardContent">
+                    <strong>Title: {quizItem.title}</strong>
+                    <p>Date: {quizItem.date}</p>
+                    <p>Status: <strong>{quizItem.current_step}</strong></p>
+                    <p>Difficulty: {quizItem.difficulty}</p>
+                    <p>Author: {quizItem.author}</p>
+                    <p>Description: {quizItem.description}</p>
+                  </div>
+                  <div className={"buttonContainer"}>
+                  {quizItem.current_step !== 6 ? (
+                      <button
+                          className="deleteButton"
+                          onClick={() => deleteQuizHandler(quizItem.id)}
+                      >
+                        Delete quiz
+                      </button>
+                  ) : (
+                      <button
+                          className="downloadButton"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = quizItem.download_url;
+                            link.download = quizItem.title;
+                            link.click();
+                          }}
+                      >
+                        Download quiz
+                      </button>
+                  )}
+                  </div>
                 </div>
-                <button
-                  className="downloadButton"
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = quizItem.download_url;
-                    link.download = quizItem.title;
-                    link.click();
-                  }}
-                >
-                  Завантажити файл
-                </button>
-              </div>
             ))}
           </div>
           <div className="pagination">
             {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                className={`paginationButton ${currentPage === index + 1 ? 'active' : ''}`}
-                onClick={() => handlePageChange(index + 1)}
-              >
+                <button
+                    key={index}
+                    className={`paginationButton ${currentPage === index + 1 ? 'active' : ''}`}
+                    onClick={() => handlePageChange(index + 1)}
+                >
                 {index + 1}
-              </button>
+                </button>
             ))}
           </div>
         </div>
